@@ -25,9 +25,80 @@ using namespace std;
 // Tutorial3
 #include <glm/gtc/matrix_transform.hpp>
 
+// Tutorial 5:
+#include <common/texture.hpp>
+
+// Tutorial 6:
+#include <common/controls.hpp>
 /*** ***/
 
+/*** BEG: TUT 5A ***
+GLuint loadBMP_custom(const char * imagepath) {
+    // Data read from the header of the BMP file
+    unsigned char header[54]; // Each BMP file begins by a 54-bytes header
+    unsigned int dataPos;     // Position in the file where the actual data begins
+    unsigned int width, height;
+    unsigned int imageSize;   // = width*height*3
+                              // Actual RGB data
+    unsigned char * data;
 
+    // Open the file
+    FILE * file = fopen(imagepath, "rb");
+    if (!file) { printf("Image could not be opened\n"); return 0; }
+
+    if (fread(header, 1, 54, file) != 54) { // If not 54 bytes read : problem
+        printf("Not a correct BMP file\n");
+        return false;
+    }
+    else if (header[0] != 'B' || header[1] != 'M') {
+        printf("Not a correct BMP file\n");
+        return 0;
+    }
+
+    // Read ints from the byte array
+    dataPos = *(int*)&(header[0x0A]);
+    imageSize = *(int*)&(header[0x22]);
+    width = *(int*)&(header[0x12]);
+    height = *(int*)&(header[0x16]);
+
+    // Some BMP files are misformatted, guess missing information
+    if (imageSize == 0)    imageSize = width*height * 3; // 3 : one byte for each Red, Green and Blue component
+    if (dataPos == 0)      dataPos = 54; // The BMP header is done that way
+
+    // Create a buffer
+    data = new unsigned char[imageSize];
+
+    // Read the actual data from the file into the buffer
+    fread(data, 1, imageSize, file);
+
+    //Everything is in memory now, the file can be closed
+    fclose(file);
+
+    //////////////////////////
+
+    // Create one OpenGL texture
+    GLuint textureID;
+    glGenTextures(1, &textureID);
+
+    // "Bind" the newly created texture : all future texture functions will modify this texture
+    glBindTexture(GL_TEXTURE_2D, textureID);
+
+    // Give the image to OpenGL
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_BGR, GL_UNSIGNED_BYTE, data);
+
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+    /// 5D
+    // When MAGnifying the image (no bigger mipmap available), use LINEAR filtering
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    // When MINifying the image, use a LINEAR blend of two mipmaps, each filtered LINEARLY too
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    // Generate mipmaps, by the way.
+    glGenerateMipmap(GL_TEXTURE_2D);
+    //
+}
+*** END: TUT 5A ***/
 
 int main( void )
 {
@@ -80,6 +151,9 @@ int main( void )
     // Accept fragment if it closer to the camera than the former one
     glDepthFunc(GL_LESS);
     /*** END: TUT 4C ***/
+    // TUT6:
+    // Cull triangles which normal is not towards the camera
+    glEnable(GL_CULL_FACE);
 
     /******* Start Tutorial 2A *******/
     GLuint VertexArrayID;
@@ -89,26 +163,30 @@ int main( void )
     // Create and compile our GLSL program from the shaders
     GLuint programID = LoadShaders("SimpleVertexShader.vertexshader", "SimpleFragmentShader.fragmentshader");
 
-    /*** Start Tutorial 3A ***/
+    //*** Start Tutorial 3A ***
     GLuint MatrixID = glGetUniformLocation(programID, "MVP");
-    mat4 Projection = perspective(45.0f, 4.0f / 3.0f, 0.1f, 100.0f);
-    //glm::mat4 Projection = glm::perspective(glm::radians(45.0f), (float)width / (float)height, 0.1f, 100.0f);
-    mat4 View = lookAt(
-        vec3(4, 3, 3), // Camera is at (4,3,3), in World Space
-        vec3(0, 0, 0), // and looks at the origin
-        vec3(0, 1, 0)  // Head is up (set to 0,-1,0 to look upside-down)
-    );
+    //mat4 Projection = perspective(45.0f, 4.0f / 3.0f, 0.1f, 100.0f);
+    //mat4 View = lookAt(
+    //    vec3(4, 3, 3), // Camera is at (4,3,3), in World Space
+    //    vec3(0, 0, 0), // and looks at the origin
+    //    vec3(0, 1, 0)  // Head is up (set to 0,-1,0 to look upside-down)
+    //);
 
     // Model matrix : an identity matrix (model will be at the origin)
-    mat4 Model = mat4(1.0f);
-
+    //mat4 Model = mat4(1.0f);
     // Our ModelViewProjection : multiplication of our 3 matrices
-    mat4 mvp = Projection * View * Model; // Remember, matrix multiplication is the other way around
-    /*** END TUTORIAL 3 A ***/
+    //mat4 mvp = Projection * View * Model; // Remember, matrix multiplication is the other way around
+    // *** END TUTORIAL 3 A ***/
+
+    /*** BEG: TUT 5A ***/
+    //GLuint image = loadBMP_custom("./my_texture.bmp");
+    GLuint image = loadBMP_custom("./uvtemplate_2.bmp");
+    //GLuint image = loadDDS("./uvtemplate.DDS");
+    GLuint TextureID = glGetUniformLocation(programID, "myTextureSampler");
+    /*** END: TUT 5A ***/
 
     // VERTEX BUFFER OBJECT
-/*
-    static const GLfloat g_vertex_buffer_data[] = {
+/*  static const GLfloat g_vertex_buffer_data[] = {
         -2.0f, -1.0f, 0.0f,
          1.0f, -1.0f, 0.0f,
          0.0f,  1.0f, 0.0f,
@@ -153,6 +231,46 @@ int main( void )
         1.0f,-1.0f, 1.0f
     };
 
+    // Two UV coordinatesfor each vertex. They were created with Blender. You'll learn shortly how to do this yourself.
+    static const GLfloat g_uv_buffer_data[] = {
+        0.000059f, 1.0f - 0.000004f,
+        0.000103f, 1.0f - 0.336048f,
+        0.335973f, 1.0f - 0.335903f,
+        1.000023f, 1.0f - 0.000013f,
+        0.667979f, 1.0f - 0.335851f,
+        0.999958f, 1.0f - 0.336064f,
+        0.667979f, 1.0f - 0.335851f,
+        0.336024f, 1.0f - 0.671877f,
+        0.667969f, 1.0f - 0.671889f,
+        1.000023f, 1.0f - 0.000013f,
+        0.668104f, 1.0f - 0.000013f,
+        0.667979f, 1.0f - 0.335851f,
+        0.000059f, 1.0f - 0.000004f,
+        0.335973f, 1.0f - 0.335903f,
+        0.336098f, 1.0f - 0.000071f,
+        0.667979f, 1.0f - 0.335851f,
+        0.335973f, 1.0f - 0.335903f,
+        0.336024f, 1.0f - 0.671877f,
+        1.000004f, 1.0f - 0.671847f,
+        0.999958f, 1.0f - 0.336064f,
+        0.667979f, 1.0f - 0.335851f,
+        0.668104f, 1.0f - 0.000013f,
+        0.335973f, 1.0f - 0.335903f,
+        0.667979f, 1.0f - 0.335851f,
+        0.335973f, 1.0f - 0.335903f,
+        0.668104f, 1.0f - 0.000013f,
+        0.336098f, 1.0f - 0.000071f,
+        0.000103f, 1.0f - 0.336048f,
+        0.000004f, 1.0f - 0.671870f,
+        0.336024f, 1.0f - 0.671877f,
+        0.000103f, 1.0f - 0.336048f,
+        0.336024f, 1.0f - 0.671877f,
+        0.335973f, 1.0f - 0.335903f,
+        0.667969f, 1.0f - 0.671889f,
+        1.000004f, 1.0f - 0.671847f,
+        0.667979f, 1.0f - 0.335851f
+    };
+    /*
     // One color for each vertex. They were generated randomly.
     static const GLfloat g_color_buffer_data[] = {
         0.583f,  0.771f,  0.014f,
@@ -192,7 +310,7 @@ int main( void )
         0.820f,  0.883f,  0.371f,
         0.982f,  0.099f,  0.879f
     };
-
+    */
 
     // This will identify our vertex buffer
     // Generate 1 buffer, put the resulting identifier in vertexbuffer
@@ -203,12 +321,20 @@ int main( void )
     glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
 
-    /*** START TUT 4A ***/
+    /*** START TUT 4A ***
     GLuint colorbuffer;
     glGenBuffers(1, &colorbuffer);
     glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(g_color_buffer_data), g_color_buffer_data, GL_STATIC_DRAW);
-    /*** END TUT 4B ***/
+    //glBufferData(GL_ARRAY_BUFFER, sizeof(g_color_buffer_data), g_color_buffer_data, GL_STATIC_DRAW);
+    *** END TUT 4B ***/
+
+    /*** BEG: TUT 5 ***/
+    GLuint uvbuffer;
+    glGenBuffers(1, &uvbuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(g_uv_buffer_data), g_uv_buffer_data, GL_STATIC_DRAW);
+    /*** END: TUT 5 ***/
+
 
     /******* End Tutorial 2A ********/
 
@@ -221,11 +347,27 @@ int main( void )
         // Use our shader
         glUseProgram(programID);
 
+        /*** BEG: TUT 6 ***/
+        // these functions are declared in "controls.hpp"
+        computeMatricesFromInputs();
+        glm::mat4 ProjectionMatrix = getProjectionMatrix();
+        glm::mat4 ViewMatrix = getViewMatrix();
+        glm::mat4 ModelMatrix = glm::mat4(1.0);
+        glm::mat4 MVP = ProjectionMatrix * ViewMatrix * ModelMatrix;
+        /*** END: TUT 6 ***/
+
         /*** START TUT 3B ***/
-        glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &mvp[0][0]);
+        glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
         /*** END TUT 3B ***/
 
-        // 1rst attribute buffer : vertices
+        /*** BEG: TUT 5C ***/
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, image);
+        // Set our "myTextureSampler" sampler to user Texture Unit 0
+        glUniform1i(TextureID, 0);
+        /*** END: TUT 5C ***/
+
+        // 1st attribute buffer : vertices
         glEnableVertexAttribArray(0);
         glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
         glVertexAttribPointer(
@@ -240,10 +382,10 @@ int main( void )
         /*** BEG: TUT 4B ***/
         // 2nd attribute buffer : colors
         glEnableVertexAttribArray(1);
-        glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
+        glBindBuffer(GL_ARRAY_BUFFER, uvbuffer); //colorbuffer);
         glVertexAttribPointer(
             1,                                // attribute. No particular reason for 1, but must match the layout in the shader.
-            3,                                // size
+            2, //3,                           // size
             GL_FLOAT,                         // type
             GL_FALSE,                         // normalized?
             0,                                // stride
@@ -256,6 +398,7 @@ int main( void )
         glDrawArrays(GL_TRIANGLES, 0, 12 * 3);
 
         glDisableVertexAttribArray(0);
+        glDisableVertexAttribArray(1);
         /*** End Tutorial 2B ***/
 
 
@@ -269,9 +412,10 @@ int main( void )
 
     // Cleanup VBO
     glDeleteBuffers(1, &vertexbuffer);
-    glDeleteVertexArrays(1, &VertexArrayID);
+    glDeleteBuffers(1, &uvbuffer);
     glDeleteProgram(programID);
-
+    glDeleteTextures(1, &TextureID);
+    glDeleteVertexArrays(1, &VertexArrayID);
 
 	// Close OpenGL window and terminate GLFW
 	glfwTerminate();
