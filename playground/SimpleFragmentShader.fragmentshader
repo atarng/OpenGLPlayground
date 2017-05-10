@@ -14,11 +14,11 @@ uniform sampler2D myTextureSampler;
 void main()
 {
 	// Tut 2: Output color = red 
-	//color = vec3(1,0,0);
+	color = vec3(1,0,0);
 
 	// TUT 4: fragmentColor defined as out of vertexShader.
 	//color = fragmentColor;
 
 	// Tut 5: Output color = color of the texture at the specified UV
-    color = texture( myTextureSampler, UV ).rgb;
+    //color = texture( myTextureSampler, UV ).rgb;
 }
