@@ -13,6 +13,10 @@ using namespace atrng;
 class ObjReader : public IFileReader, public IGeometry
 {
 public:
+    bool ReadFile(const char *);
+    inline vector<vec3> GetVertices() { return m_vertices; }
+    inline vector<vec2> GetUVs() { return m_uvs; }
+    inline vector<vec3> GetNormals() { return m_normals; }
 
 private:
     vector<vec3> m_vertices;
