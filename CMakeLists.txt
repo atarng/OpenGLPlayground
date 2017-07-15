@@ -99,7 +99,7 @@ add_definitions(
 # Xcode and Visual working directories
 # User playground
 add_executable(playground 
-	playground/playground.cpp
+	playground/AppMain.cpp
 	common/shader.cpp
 	common/shader.hpp
 )
