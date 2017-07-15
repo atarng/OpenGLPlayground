@@ -1,8 +1,6 @@
 #pragma once
-namespace atrng
-{
+namespace atrng{
 class IInputListener {
 public:
-
 };
 }

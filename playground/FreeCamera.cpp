@@ -52,20 +52,36 @@ void FreeCamera::Update()
     glm::vec3 up = glm::cross(right, direction);
 
     // Move forward
-    if (glfwGetKey(m_window, GLFW_KEY_UP) == GLFW_PRESS) {
+    if( glfwGetKey(m_window, GLFW_KEY_UP) == GLFW_PRESS ||
+        glfwGetKey(m_window, GLFW_KEY_W) == GLFW_PRESS
+    ) {
         m_position += direction * deltaTime * m_speed;
     }
     // Move backward
-    if (glfwGetKey(m_window, GLFW_KEY_DOWN) == GLFW_PRESS) {
+    if( glfwGetKey(m_window, GLFW_KEY_DOWN) == GLFW_PRESS ||
+        glfwGetKey(m_window, GLFW_KEY_S) == GLFW_PRESS
+    ) {
         m_position -= direction * deltaTime * m_speed;
     }
     // Strafe right
-    if (glfwGetKey(m_window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
+    if (glfwGetKey(m_window, GLFW_KEY_RIGHT) == GLFW_PRESS ||
+        glfwGetKey(m_window, GLFW_KEY_D) == GLFW_PRESS
+    ) {
         m_position += right * deltaTime * m_speed;
     }
     // Strafe left
-    if (glfwGetKey(m_window, GLFW_KEY_LEFT) == GLFW_PRESS) {
+    if (glfwGetKey(m_window, GLFW_KEY_LEFT) == GLFW_PRESS ||
+        glfwGetKey(m_window, GLFW_KEY_A) == GLFW_PRESS
+    ) {
         m_position -= right * deltaTime * m_speed;
+    }
+    // Strafe Up
+    if (glfwGetKey(m_window, GLFW_KEY_Q) == GLFW_PRESS) {
+        m_position += up * deltaTime * m_speed;
+    }
+    // Strafe Down
+    if( glfwGetKey(m_window, GLFW_KEY_Z) == GLFW_PRESS ) {
+        m_position -= up * deltaTime * m_speed;
     }
 
     float FoV = m_fov;// - 5 * glfwGetMouseWheel(); // Now GLFW 3 requires setting up a callback for this. It's a bit too complicated for this beginner's tutorial, so it's disabled instead.
