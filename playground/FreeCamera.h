@@ -10,7 +10,6 @@ using namespace glm;
 using namespace atrng;
 
 class FreeCamera : public ICamera, public IInputListener
-    //, public IUpdate
 {
 public:
     FreeCamera(GLFWwindow*);
@@ -18,7 +17,9 @@ public:
     void Update();
 
     inline mat4 GetProjectionMatrix() { return m_projectionMatrix; }
-    inline mat4 GetViewMatrix() { return m_viewMatrix; }
+    inline mat4 GetViewMatrix()       { return m_viewMatrix; }
+
+    inline vec3 GetPosition() { return m_position; }
 
 protected:
 private:

@@ -13,7 +13,8 @@ using namespace atrng;
 class TextureLoader : public IFileReader
 {
 public:
-    int LoadFiles(vector<string>);
+    vector<int> LoadFiles(vector<string>);
+    int LoadBmpAsNormalMap(string);
 
 private:
 

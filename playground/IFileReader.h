@@ -7,6 +7,6 @@ namespace atrng
 {
 class IFileReader {
 public:
-    virtual int LoadFiles(vector<string>) = 0;
+    virtual vector<int> LoadFiles(vector<string>) = 0;
 };
 }

@@ -22,15 +22,15 @@ void TutorialShadowMapping::Render_Loop_Setup(GLFWwindow* window) {
     vector<string> vs = { "DepthRTT.vertexshader", "DepthRTT.fragmentshader"};
 
     ShaderReader sr;
-    depthProgramID = sr.LoadFiles(vs);// LoadShaders();
+    depthProgramID = sr.LoadFiles(vs)[0];// LoadShaders();
 
     // Get a handle for our "MVP" uniform
     depthMatrixID = glGetUniformLocation(depthProgramID, "depthMVP");
 
     // Load the texture
-    vs = { "uvmap.DDS" };
+    vs = { "uvmap_room.DDS" }; //"uvmap.DDS" };
     TextureLoader tl;
-    Texture = tl.LoadFiles(vs); //loadDDS("uvmap.DDS");
+    Texture = tl.LoadFiles(vs)[0]; //loadDDS("uvmap.DDS");
 
     vector<vec3> vertices, indexed_vertices, normals, indexed_normals;
     vector<vec2> uvs, indexed_uvs;
@@ -142,18 +142,18 @@ void TutorialShadowMapping::Render_Loop_Implementation() {
     // Use our shader
     glUseProgram(depthProgramID);
 
-    glm::vec3 lightInvDir = glm::vec3(0.5f, 2, 2);
+    vec3 lightInvDir = glm::vec3(0.5f, 2, 2);
 
     // Compute the MVP matrix from the light's point of view
-    glm::mat4 depthProjectionMatrix = glm::ortho<float>(-10, 10, -10, 10, -10, 20);
-    glm::mat4 depthViewMatrix = glm::lookAt(lightInvDir, glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+    mat4 depthProjectionMatrix = glm::ortho<float>(-10, 10, -10, 10, -10, 20);
+    mat4 depthViewMatrix = glm::lookAt(lightInvDir, glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
     // or, for spot light :
     //glm::vec3 lightPos(5, 20, 20);
     //glm::mat4 depthProjectionMatrix = glm::perspective<float>(45.0f, 1.0f, 2.0f, 50.0f);
     //glm::mat4 depthViewMatrix = glm::lookAt(lightPos, lightPos-lightInvDir, glm::vec3(0,1,0));
 
-    glm::mat4 depthModelMatrix = glm::mat4(1.0);
-    glm::mat4 depthMVP = depthProjectionMatrix * depthViewMatrix * depthModelMatrix;
+    mat4 depthModelMatrix = glm::mat4(1.0);
+    mat4 depthMVP = depthProjectionMatrix * depthViewMatrix * depthModelMatrix;
 
     // Send our transformation to the currently bound shader, 
     // in the "MVP" uniform

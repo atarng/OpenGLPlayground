@@ -6,11 +6,14 @@
 #include <vector>
 
 #include <GL/glew.h>
-int ShaderReader::LoadFiles(vector<string>vectorList) {
+vector<int> ShaderReader::LoadFiles(vector<string>vectorList) {
+    vector<int> ret_vector;
     if (vectorList.size() != 2) {
-        return 0;
+        ret_vector.push_back(0);
+        return ret_vector;
     }
-    return LoadShaders(vectorList[0], vectorList[1]);
+    ret_vector.push_back(LoadShaders(vectorList[0], vectorList[1]));
+    return ret_vector;
 }
 
 int ShaderReader::LoadShaders(string vertex_file_path, string fragment_file_path)
@@ -101,8 +104,6 @@ int ShaderReader::LoadShaders(string vertex_file_path, string fragment_file_path
         printf("%s\n", &FragmentShaderErrorMessage[0]);
     }
 
-
-
     // Link the program
     printf("Linking program\n");
     GLuint ProgramID = glCreateProgram();
@@ -118,7 +119,6 @@ int ShaderReader::LoadShaders(string vertex_file_path, string fragment_file_path
         glGetProgramInfoLog(ProgramID, InfoLogLength, NULL, &ProgramErrorMessage[0]);
         printf("%s\n", &ProgramErrorMessage[0]);
     }
-
 
     glDetachShader(ProgramID, VertexShaderID);
     glDetachShader(ProgramID, FragmentShaderID);

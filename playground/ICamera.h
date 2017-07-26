@@ -8,5 +8,6 @@ class ICamera {
 public:
     virtual mat4 GetProjectionMatrix() = 0;
     virtual mat4 GetViewMatrix() = 0;
+    virtual vec3 GetPosition() = 0;
 };
 }

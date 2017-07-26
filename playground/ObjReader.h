@@ -14,7 +14,7 @@ class ObjReader : public IFileReader, public IGeometry
 {
 public:
     //bool ReadFile(const char *);
-    int LoadFiles(vector<string>);
+    vector<int> LoadFiles(vector<string>);
 
     inline vector<vec3> GetVertices() { return m_vertices; }
     inline vector<vec2> GetUVs() { return m_uvs; }

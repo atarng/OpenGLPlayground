@@ -14,8 +14,7 @@ FreeCamera::FreeCamera(GLFWwindow* window) :
 }
 
 // Temp function
-void FreeCamera::Update()
-{
+void FreeCamera::Update() {
     // glfwGetTime is called only once, the first time this function is called
     static double lastTime = glfwGetTime();
 
@@ -35,21 +34,16 @@ void FreeCamera::Update()
     m_verticalAngle     += m_mouseSpeed * float(768 / 2 - ypos);
 
     // Direction : Spherical coordinates to Cartesian coordinates conversion
-    glm::vec3 direction(
-        cos(m_verticalAngle) * sin(m_horizontalAngle),
-        sin(m_verticalAngle),
-        cos(m_verticalAngle) * cos(m_horizontalAngle)
-    );
+    vec3 direction( cos(m_verticalAngle) * sin(m_horizontalAngle),
+                    sin(m_verticalAngle),
+                    cos(m_verticalAngle) * cos(m_horizontalAngle) );
 
     // Right vector
-    glm::vec3 right = glm::vec3(
-        sin(m_horizontalAngle - 3.14f / 2.0f),
-        0,
-        cos(m_horizontalAngle - 3.14f / 2.0f)
-    );
+    vec3 right = vec3( sin(m_horizontalAngle - 3.14f / 2.0f),
+                    0, cos(m_horizontalAngle - 3.14f / 2.0f) );
 
     // Up vector
-    glm::vec3 up = glm::cross(right, direction);
+    vec3 up = cross(right, direction);
 
     // Move forward
     if( glfwGetKey(m_window, GLFW_KEY_UP) == GLFW_PRESS ||
@@ -83,18 +77,18 @@ void FreeCamera::Update()
     if( glfwGetKey(m_window, GLFW_KEY_Z) == GLFW_PRESS ) {
         m_position -= up * deltaTime * m_speed;
     }
+    // glfwGetMouseWheel : Now GLFW 3 requires setting up a callback for this.
+    // It's a bit too complicated for this beginner's tutorial, so it's disabled instead.
+    float FoV = m_fov;
 
-    float FoV = m_fov;// - 5 * glfwGetMouseWheel(); // Now GLFW 3 requires setting up a callback for this. It's a bit too complicated for this beginner's tutorial, so it's disabled instead.
-
-                           // Projection matrix : 45° Field of View, 4:3 ratio, display range : 0.1 unit <-> 100 units
+    // Projection matrix : 45° Field of View, 4:3 ratio, display range : 0.1 unit <-> 100 units
     m_projectionMatrix = perspective(FoV, 4.0f / 3.0f, 0.1f, 100.0f);
     // Camera matrix
-    m_viewMatrix = lookAt(
-        m_position,             // Camera is here
-        m_position + direction, // and looks here : at the same position, plus "direction"
-        up                      // Head is up (set to 0,-1,0 to look upside-down)
-    );
-
+    // m_position: Camera is here
+    // m_position + direction: and looks here, at the same position, plus "direction".
+    // Head is up (set to 0,-1,0 to look upside-down)
+    m_viewMatrix = lookAt( m_position, m_position + direction, up);
+    
     // For the next frame, the "last time" will be "now"
     lastTime = currentTime;
 }

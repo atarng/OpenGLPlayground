@@ -16,11 +16,15 @@ GLFWwindow* window;
 //#include <common/shader.hpp>
 ///////////////////////////////
 
-#include "ObjReader.h"
+//#include "ObjReader.h"
 #include "SimpleGeometry.h"
+#include "FPS_Update.h"
 
 #include "TutorialObjLoading.h"
 #include "TutorialShadowMapping.h"
+#include "TutorialExtensions.h"
+#include "TutorialBumpMapping.h"
+#include "TutorialRenderToTexture.h"
 /*** ***/
 
 using namespace glm;
@@ -45,8 +49,14 @@ int SetUpWindow() {
     }
     glfwMakeContextCurrent(window);
 
-    // Ensure we can capture the escape key being pressed below
-    glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
+    // Initialize GLEW
+    glewExperimental = true; // Needed for core profile
+    if (glewInit() != GLEW_OK) {
+        fprintf(stderr, "Failed to initialize GLEW\n");
+        getchar();
+        glfwTerminate();
+        return -1;
+    }
 
     ///
     // FRAME BUFFER WXH
@@ -57,7 +67,12 @@ int SetUpWindow() {
     return 0;
 }
 
-void SetUpGLSettings() {
+void SetUpGLFWSettings() {
+
+    // Ensure we can capture the escape key being pressed below
+    glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
+    // Hide the mouse and enable unlimited mouvement
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     //******* Tut 16 ********
     glfwPollEvents();
@@ -75,11 +90,16 @@ void SetUpGLSettings() {
     // Cull triangles which normal is not towards the camera
     glEnable(GL_CULL_FACE);
 
-
+    /*****/
+    /*****/
 }
 
 int main( void )
 {
+    int to_render = 0;
+    cout << "Enter a number (0-4): ";
+    cin >> to_render;
+
 	// Initialise GLFW
 	if( !glfwInit() )
 	{
@@ -92,28 +112,34 @@ int main( void )
         return -1;
     }
 
-	// Initialize GLEW
-    glewExperimental = true; // Needed for core profile
-	if (glewInit() != GLEW_OK) {
-		fprintf(stderr, "Failed to initialize GLEW\n");
-		getchar();
-		glfwTerminate();
-		return -1;
-	}
-
-    // Ensure we can capture the escape key being pressed below
-    glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-
-    SetUpGLSettings();
+    SetUpGLFWSettings();
 
     /////
-    ITutorialRenders* tr = new TutorialObjLoading(); 
-    //ITutorialRenders* tr = new TutorialShadowMapping();
+    ITutorialRenders* tr;
+    switch (to_render) {
+    case 4:
+        tr = new TutorialRenderToTexture();
+        break;
+    case 3:
+        tr = new TutorialBumpMapping();
+        break;
+    case 2:
+        tr = new TutorialExtensions();
+        break;
+    case 1: 
+        tr = new TutorialShadowMapping();
+        break;
+    case 0:
+    default:
+        tr = new TutorialObjLoading();
+        break;
+    }
 
     tr->Render_Loop_Setup(window);
-
+    FPS_Update fu;
 	do{
+        fu.Loop();
+
         // Clear the screen
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 

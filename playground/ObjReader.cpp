@@ -1,69 +1,69 @@
 #include "ObjReader.h"
 
 //bool ObjReader::ReadFile(const char * path)
-int ObjReader::LoadFiles(vector<string> objs_to_load)
+/***
+ * This is really just a true false result.
+ */
+vector<int> ObjReader::LoadFiles(vector<string> objs_to_load)
 {
     string file_path_candidates[] = { "", "Assets/" };
     int size_of_file_paths = sizeof(file_path_candidates) / sizeof(file_path_candidates[0]);
 
-    std::vector<unsigned int> vertexIndices, uvIndices, normalIndices;
-    std::vector<glm::vec3> temp_vertices;
-    std::vector<glm::vec2> temp_uvs;
-    std::vector<glm::vec3> temp_normals;
-
+    vector<unsigned int> vertexIndices, uvIndices, normalIndices;
+    vector<vec3> temp_vertices, temp_normals;
+    vector<vec2> temp_uvs;
+    vector<int> ret_vector;
     for (int i = 0; i < objs_to_load.size(); i++) {
         const char* path = objs_to_load[i].c_str();
         printf("Loading OBJ file %s...\n", path);
 
         FILE * file = NULL;
-        while (file == NULL && i < size_of_file_paths) {
-            file = fopen((file_path_candidates[0] + objs_to_load[i]).c_str(), "r");
-            i++;
+        int f_i = 0;
+        while (file == NULL && f_i < size_of_file_paths) {
+            file = fopen((file_path_candidates[f_i] + objs_to_load[i]).c_str(), "r");
+            f_i++;
         }
-        if (file == NULL)
-        {
+        if (file == NULL) {
             printf("Impossible to open the file ! Are you in the right path ? See Tutorial 1 for details\n");
             getchar();
-            return 0;// false;
+            //return 0;// false;
+            //ret_vector.push_back(0);
+            return ret_vector;
         }
-
-        while (1)
-        {
+        bool exit = false;
+        while (1) {
             char lineHeader[128];
             // read the first word of the line
             int res = fscanf(file, "%s", lineHeader);
             if (res == EOF)
                 break; // EOF = End Of File. Quit the loop.
-
                        // else : parse lineHeader
 
-            if (strcmp(lineHeader, "v") == 0)
-            {
+            if (strcmp(lineHeader, "v") == 0) {
                 glm::vec3 vertex;
                 fscanf(file, "%f %f %f\n", &vertex.x, &vertex.y, &vertex.z);
                 temp_vertices.push_back(vertex);
             }
-            else if (strcmp(lineHeader, "vt") == 0)
-            {
+            else if (strcmp(lineHeader, "vt") == 0) {
                 glm::vec2 uv;
                 fscanf(file, "%f %f\n", &uv.x, &uv.y);
                 uv.y = -uv.y; // Invert V coordinate since we will only use DDS texture, which are inverted. Remove if you want to use TGA or BMP loaders.
                 temp_uvs.push_back(uv);
             }
-            else if (strcmp(lineHeader, "vn") == 0)
-            {
+            else if (strcmp(lineHeader, "vn") == 0) {
                 glm::vec3 normal;
                 fscanf(file, "%f %f %f\n", &normal.x, &normal.y, &normal.z);
                 temp_normals.push_back(normal);
             }
-            else if (strcmp(lineHeader, "f") == 0)
-            {
+            else if (strcmp(lineHeader, "f") == 0) {
                 std::string vertex1, vertex2, vertex3;
                 unsigned int vertexIndex[3], uvIndex[3], normalIndex[3];
                 int matches = fscanf(file, "%d/%d/%d %d/%d/%d %d/%d/%d\n", &vertexIndex[0], &uvIndex[0], &normalIndex[0], &vertexIndex[1], &uvIndex[1], &normalIndex[1], &vertexIndex[2], &uvIndex[2], &normalIndex[2]);
                 if (matches != 9) {
                     printf("File can't be read by our simple parser :-( Try exporting with other options\n");
-                    return 0;// false;
+                    //return 0;// false;
+                    return ret_vector;
+                    break;
                 }
                 vertexIndices.push_back(vertexIndex[0]);
                 vertexIndices.push_back(vertexIndex[1]);
@@ -83,6 +83,8 @@ int ObjReader::LoadFiles(vector<string> objs_to_load)
 
         }
 
+        if (exit) continue;
+
         for (unsigned int i = 0; i<vertexIndices.size(); i++)
         {// For each vertex of each triangle
          // Get the indices of its attributes
@@ -91,9 +93,9 @@ int ObjReader::LoadFiles(vector<string> objs_to_load)
             unsigned int normalIndex = normalIndices[i];
 
             // Get the attributes thanks to the index
-            glm::vec3 vertex = temp_vertices[vertexIndex - 1];
-            glm::vec2 uv = temp_uvs[uvIndex - 1];
-            glm::vec3 normal = temp_normals[normalIndex - 1];
+            vec3 vertex = temp_vertices[vertexIndex - 1];
+            vec2 uv     = temp_uvs[uvIndex - 1];
+            vec3 normal = temp_normals[normalIndex - 1];
 
             // Put the attributes in buffers
             m_vertices.push_back(vertex);
@@ -101,5 +103,6 @@ int ObjReader::LoadFiles(vector<string> objs_to_load)
             m_normals.push_back(normal);
         }
     }
-    return 1;
+    ret_vector.push_back(0);
+    return ret_vector;
 }
