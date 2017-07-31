@@ -1,0 +1,25 @@
+Info,  T12596: this is my info-call
+Info,  T12596: Load Assets/boblampclean.md5mesh
+Debug, T12596: Assimp 3.3.0 amd64 msvc debug shared singlethreaded
+Info,  T12596: Found a matching importer for this file format: Doom 3 / MD5 Mesh Importer.
+Info,  T12596: Import root directory is 'Assets\'
+Debug, T12596: MD5Parser begin
+Info,  T12596: commandline ""
+Debug, T12596: MD5Parser end. Parsed 9 sections
+Debug, T12596: MD5MeshParser begin
+Debug, T12596: MD5MeshParser end
+Debug, T12596: MD5Parser begin
+Info,  T12596: commandline ""
+Debug, T12596: MD5Parser end. Parsed 147 sections
+Debug, T12596: MD5AnimParser begin
+Debug, T12596: MD5AnimParser end
+Debug, T12596: ScenePreprocessor: Dummy scaling track has been generated
+Skipping one or more lines with the same contents
+Info,  T12596: Entering post processing pipeline
+Debug, T12596: FlipUVsProcess begin
+Debug, T12596: FlipUVsProcess finished
+Debug, T12596: TriangulateProcess begin
+Debug, T12596: TriangulateProcess finished. There was nothing to be done.
+Debug, T12596: GenVertexNormalsProcess begin
+Info,  T12596: GenVertexNormalsProcess finished. Vertex normals have been calculated
+Info,  T12596: Leaving post processing pipeline

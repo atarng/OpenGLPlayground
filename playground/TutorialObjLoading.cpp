@@ -14,11 +14,13 @@
 
 
 
-
 void TutorialObjLoading::Render_Loop_Setup(GLFWwindow* window) {
     /******* Start Tutorial 2A *******/
     glGenVertexArrays(1, &VertexArrayID);
     glBindVertexArray(VertexArrayID);
+
+    vector<string> vs;
+
 
     m_freeCamera = new FreeCamera(window);
 
@@ -35,7 +37,7 @@ void TutorialObjLoading::Render_Loop_Setup(GLFWwindow* window) {
     //GLuint programID = LoadShaders("SimpleVertexShader.vertexshader", "SimpleFragmentShader.fragmentshader");
     //GLuint programID = LoadShaders("StandardShading.vertexshader", "StandardShading.fragmentshader");
     ShaderReader sr;
-    vector<string> vs = { "StandardShading.vertexshader", "StandardShading.fragmentshader" };
+    vs = { "StandardShading.vertexshader", "StandardShading.fragmentshader" };
     programID = sr.LoadFiles(vs)[0];
 
     vs = { "StandardShading.vertexshader", "StandardTransparentShading.fragmentshader" };
@@ -128,9 +130,11 @@ void TutorialObjLoading::Render_Loop_Implementation() {
     m_billboard[0].Render();
     m_billboard[1].Render();
 
+
     mat4 ProjectionMatrix = m_freeCamera->GetProjectionMatrix();
     mat4 ViewMatrix       = m_freeCamera->GetViewMatrix();
-    vec3 lightPos         = vec3(-4, 4, 4);
+    mat4 ModelMatrix = mat4(1.0);
+    mat4 MVP = ProjectionMatrix * ViewMatrix * ModelMatrix;
 
     glDisable(GL_BLEND);
 
@@ -139,12 +143,10 @@ void TutorialObjLoading::Render_Loop_Implementation() {
     // Use our shader
     glUseProgram(programID);
 
+    vec3 lightPos = vec3(-4, 4, 4);
     glUniform3f(LightID, lightPos.x, lightPos.y, lightPos.z);
+
     glUniformMatrix4fv(ViewMatrixID,  1, GL_FALSE, &ViewMatrix[0][0]);
-
-    mat4 ModelMatrix = mat4(1.0);
-    mat4 MVP = ProjectionMatrix * ViewMatrix * ModelMatrix;
-
     glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
     glUniformMatrix4fv(ModelMatrixID, 1, GL_FALSE, &ModelMatrix[0][0]);
 

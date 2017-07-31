@@ -9,6 +9,8 @@
 #include "Font2dLoader.h"
 #include "Billboard.h"
 #include "ParticleSystem.h"
+#include "AssimpWrapper.h"
+
 
 using namespace atrng;
 using namespace std;

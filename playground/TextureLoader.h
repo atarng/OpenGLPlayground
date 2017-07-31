@@ -15,7 +15,9 @@ class TextureLoader : public IFileReader
 public:
     vector<int> LoadFiles(vector<string>);
     int LoadBmpAsNormalMap(string);
-
+    //int LoadDDS(string);
+protected:
+    int LoadDDS(FILE* );
 private:
 
 };

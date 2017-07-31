@@ -25,6 +25,7 @@ GLFWwindow* window;
 #include "TutorialExtensions.h"
 #include "TutorialBumpMapping.h"
 #include "TutorialRenderToTexture.h"
+#include "TutorialAssimpLoad.h"
 /*** ***/
 
 using namespace glm;
@@ -97,7 +98,7 @@ void SetUpGLFWSettings() {
 int main( void )
 {
     int to_render = 0;
-    cout << "Enter a number (0-4): ";
+    cout << "Enter a number (0-5): ";
     cin >> to_render;
 
 	// Initialise GLFW
@@ -117,6 +118,9 @@ int main( void )
     /////
     ITutorialRenders* tr;
     switch (to_render) {
+    case 5:
+        tr = new TutorialAssimpLoad();
+        break;
     case 4:
         tr = new TutorialRenderToTexture();
         break;
